@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <defs>
+    <linearGradient id="nb-bg" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="0.5" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="nb-shine" x1="0" y1="0" x2="0" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="0.55" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="22" fill="url(#nb-bg)"/>
+  <rect width="96" height="96" rx="22" fill="url(#nb-shine)"/>
+  <!-- where the request would have gone -->
+  <path d="M60 69 H80" fill="none" stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="6" stroke-linecap="round" stroke-dasharray="0.01 10"/>
+  <!-- the bent path -->
+  <path d="M16 69 H33 C46 69 50 37 63 37 H73" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M66 26.5 L78.5 37 L66 47.5" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- interception point -->
+  <circle cx="48" cy="53" r="9" fill="#FFFFFF"/>
+  <circle cx="48" cy="53" r="4" fill="#4F46E5"/>
+</svg>

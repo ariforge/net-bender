@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Net Bender - Intercept Console</title>
+  <link rel="icon" href="../icons/icon32.png">
+  <link rel="stylesheet" href="../lib/theme.css">
+  <link rel="stylesheet" href="console.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="../icons/icon48.png" alt="" width="24" height="24">
+      <span>Net Bender</span>
+    </div>
+    <div class="switches">
+      <label class="switch" title="Pause requests before they are sent to the server">
+        <input type="checkbox" id="toggle-req"><span class="track"></span>Intercept requests
+      </label>
+      <label class="switch" title="Pause responses before the page receives them">
+        <input type="checkbox" id="toggle-res"><span class="track"></span>Intercept responses
+      </label>
+    </div>
+    <div class="spacer"></div>
+    <span id="pending-pill" class="pill">0 pending</span>
+    <button id="forward-all" title="Forward every paused item unchanged">Forward all</button>
+    <button id="drop-all" class="danger" title="Abort every paused item">Drop all</button>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <section>
+        <h2>Targets</h2>
+        <ul id="targets" class="targets"></ul>
+        <p id="targets-empty" class="hint">No tab attached. Pick a tab below to start intercepting.</p>
+        <div class="attach-row">
+          <select id="tab-picker" aria-label="Tab to attach"></select>
+          <button id="attach-btn" class="primary">Attach</button>
+        </div>
+        <p class="hint">While a tab is attached, Chrome shows a "started debugging this browser" bar. That is expected.</p>
+      </section>
+
+      <section>
+        <h2>URL patterns</h2>
+        <textarea id="url-patterns" rows="4" spellcheck="false" placeholder="*"></textarea>
+        <p class="hint">One per line. <code>*</code> matches anything, <code>?</code> one character. Example: <code>*://api.example.com/*</code></p>
+      </section>
+
+      <section>
+        <h2>Resource types</h2>
+        <div id="resource-types" class="chips"></div>
+        <div class="chip-actions">
+          <button class="ghost" data-types="all">All</button>
+          <button class="ghost" data-types="api">XHR + Fetch</button>
+          <button class="ghost" data-types="none">None</button>
+        </div>
+      </section>
+
+      <div class="filter-actions">
+        <button id="apply-filters" class="primary" disabled>Apply filters</button>
+        <span id="filters-saved" class="hint" hidden>Saved</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-view="intercept" class="active">Intercept <span id="tab-count" class="count">0</span></button>
+        <button role="tab" data-view="history">History</button>
+      </nav>
+
+      <section id="view-intercept" class="view intercept">
+        <div class="queue-pane">
+          <ul id="queue" class="queue" aria-label="Paused items"></ul>
+          <div id="queue-empty" class="empty small">
+            <p>Queue is empty.</p>
+          </div>
+        </div>
+
+        <div class="editor-pane">
+          <div id="editor-empty" class="empty">
+            <img src="../icons/icon128.png" alt="" width="72" height="72">
+            <h3>Waiting for traffic</h3>
+            <p id="editor-empty-text">Attach a tab and turn on request or response interception. Matching traffic will pause here so you can edit it.</p>
+          </div>
+
+          <form id="editor" class="editor" hidden autocomplete="off">
+            <div class="editor-head">
+              <span id="ed-stage" class="badge req">Request</span>
+              <span id="ed-type" class="badge neutral"></span>
+              <span id="ed-tab" class="muted ellipsis"></span>
+              <span class="spacer"></span>
+              <span id="ed-modified" class="badge modified" hidden>Modified</span>
+            </div>
+
+            <div id="ed-request-line" class="line">
+              <input id="ed-method" class="method-input" list="methods" aria-label="Method" spellcheck="false">
+              <input id="ed-url" class="url-input" aria-label="URL" spellcheck="false">
+            </div>
+
+            <div id="ed-response-line" class="line" hidden>
+              <div id="ed-req-summary" class="req-summary ellipsis"></div>
+              <input id="ed-status" type="number" min="100" max="999" class="status-input" aria-label="Status code">
+              <input id="ed-status-text" class="status-text-input" aria-label="Status text" placeholder="Status text">
+            </div>
+
+            <div class="field headers-field">
+              <div class="field-head"><label for="ed-headers">Headers</label><span class="hint">Name: value, one per line</span></div>
+              <textarea id="ed-headers" spellcheck="false"></textarea>
+            </div>
+
+            <div class="field body-field">
+              <div class="field-head">
+                <label for="ed-body">Body</label>
+                <span id="ed-body-enc" class="badge neutral" hidden>base64</span>
+                <span class="spacer"></span>
+                <button type="button" id="ed-pretty" class="ghost small">Format JSON</button>
+              </div>
+              <div id="ed-body-note" class="note" hidden></div>
+              <textarea id="ed-body" spellcheck="false"></textarea>
+            </div>
+
+            <div class="editor-actions">
+              <button type="submit" id="ed-forward" class="primary">Forward <kbd>Ctrl+Enter</kbd></button>
+              <button type="button" id="ed-drop" class="danger">Drop <kbd>Ctrl+Shift+Enter</kbd></button>
+              <button type="button" id="ed-reset" class="ghost">Reset edits</button>
+              <span class="spacer"></span>
+              <span id="ed-error" class="error-text"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="view-history" class="view history" hidden>
+        <div class="history-toolbar">
+          <input id="history-filter" placeholder="Filter by URL, method or status" spellcheck="false">
+          <span class="spacer"></span>
+          <button id="history-clear" class="ghost">Clear history</button>
+        </div>
+        <div class="table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr><th>Time</th><th>Action</th><th>Stage</th><th>Method</th><th>Status</th><th>URL</th></tr>
+            </thead>
+            <tbody id="history-body"></tbody>
+          </table>
+          <div id="history-empty" class="empty small"><p>Items you forward or drop appear here.</p></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <datalist id="methods">
+    <option value="GET"><option value="POST"><option value="PUT"><option value="PATCH">
+    <option value="DELETE"><option value="HEAD"><option value="OPTIONS">
+  </datalist>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script type="module" src="console.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Net Bender - HTTP Interceptor",
+  "short_name": "Net Bender",
+  "version": "1.0.0",
+  "description": "Pause, inspect and edit HTTP requests and responses before they reach the server or the page.",
+  "minimum_chrome_version": "118",
+  "permissions": ["debugger", "storage"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Net Bender",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": { "default": "Alt+Shift+N" }
+    }
+  }
+}
